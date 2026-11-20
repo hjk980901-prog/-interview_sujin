@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>농촌지도사 면접 카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday — 혼자 소리 내어 연습하는 면접 카드
+   IDEA 손에 쥐고 넘기는 암기 카드 묶음
+   PICTURE 화면 가운데 큰 카드 한 장, 탭하면 뒤집혀 키워드 3개
+   COLOUR 남해 바다 남색 바탕, 흰 카드, 유자 노랑 강조, 초록=외웠어요
+   TYPE IBM Plex Sans KR 700 + 400
+   LAYOUT 폰: 진행 표시, 분류, 카드, 버튼 한 화면 / 데스크톱: 같은 구성을 가운데 넓게, 아래 질문 관리 */
+:root{color-scheme:light dark;--bg:light-dark(#f3f6fa,#0b1420);--ink:light-dark(#122033,#e7eef7);--mute:light-dark(#566579,#9fb0c4);--line:light-dark(#d6dee8,#243446);--sea:light-dark(#0f3d63,#0a2a46);--card:light-dark(#ffffff,#15212f);--yuja:#f2c230;--ok:light-dark(#23854b,#5fcf8a);--again:light-dark(#c4472c,#ff8466);--soft:light-dark(#e9eef5,#1a2838)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow-x:clip}
+.top{background:var(--sea);color:#fff;padding:20px max(5vw,16px) 28px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;letter-spacing:-.02em;margin:0 0 4px}
+.sub{color:#c9dbec;margin:0 0 14px;font-size:15px}
+.prog{display:flex;align-items:center;gap:12px;font-size:14px;color:#dce8f4}
+.bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--yuja);width:0;transition:width .3s}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.chips button{min-height:36px;padding:0 12px;border-radius:99px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font:500 14px "IBM Plex Sans KR",sans-serif;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--yuja);color:#14202e;border-color:var(--yuja)}
+.stage{padding:0 max(5vw,16px);margin-top:-14px}
+.scene{perspective:1400px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.flip{position:relative;height:clamp(300px,52vh,420px);transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.2,1)}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border-radius:20px;box-shadow:0 10px 30px rgba(10,30,60,.18),0 0 0 1px var(--line);padding:22px 22px 26px;display:flex;flex-direction:column}
+.back{transform:rotateY(180deg)}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;color:var(--mute)}
+.cat{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--soft);color:var(--ink);font-weight:500;white-space:nowrap}
+.q{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(22px,4.6vw,32px);font-weight:700;line-height:1.35;letter-spacing:-.01em;text-wrap:balance;padding:10px 4px}
+.hint{text-align:center;font-size:14px;color:var(--mute)}
+.qs{font-size:15px;color:var(--mute);margin:10px 0 4px;text-wrap:balance}
+.kw{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;list-style:none;margin:0;padding:0}
+.kw li{display:flex;align-items:center;gap:12px;font-size:clamp(19px,3.8vw,24px);font-weight:700;line-height:1.3}
+.kw li::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;background:var(--yuja);box-shadow:0 0 0 4px color-mix(in srgb,var(--yuja) 25%,transparent)}
+.state{position:absolute;top:18px;right:20px}
+.known{color:var(--ok);font-weight:700;font-size:14px}
+.timer{position:absolute;left:22px;right:22px;bottom:12px;height:5px;border-radius:99px;background:var(--soft);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--sea);transform-origin:left}
+.timer.late i{background:var(--again)}
+.ring{position:relative;width:96px;height:96px;margin:0 auto 6px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .trk{fill:none;stroke:var(--soft);stroke-width:9}
+.ring .arc{fill:none;stroke:var(--ok);stroke-width:9;stroke-linecap:round;transition:stroke .4s}
+.ring.mid .arc{stroke:var(--yuja)}
+.ring.late .arc,.ring.over .arc{stroke:var(--again)}
+.ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.ring .num small{font-size:12px;font-weight:500;color:var(--mute)}
+.ring.over .num{color:var(--again)}
+@media(prefers-reduced-motion:no-preference){.ring.over{animation:pulse 1s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.06)}}}
+.q.withring{padding-bottom:0}
+.spent{font-size:15px;color:var(--mute);text-align:center;margin-top:8px}
+.spent b{color:var(--ink);font-variant-numeric:tabular-nums}
+.opts select{width:auto;display:inline-block;margin:0;min-height:40px;font-size:14px;padding:4px 8px;background:var(--card)}
+.ctrl{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:14px}
+.mark{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+button{font:500 16px "IBM Plex Sans KR",sans-serif;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:hover{background:var(--soft)}
+button:focus-visible,input:focus,select:focus,textarea:focus{outline:3px solid color-mix(in srgb,var(--yuja) 70%,transparent);outline-offset:2px}
+button.main{background:var(--sea);color:#fff;border-color:transparent}
+button.ok{background:var(--ok);color:#fff;border-color:transparent}
+button.again{color:var(--again);border-color:color-mix(in srgb,var(--again) 45%,transparent)}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.opts button{min-height:40px;font-size:14px;padding:0 12px}
+.opts button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
+.band{padding:36px max(5vw,16px) 48px}
+h2{font-size:22px;margin:0 0 6px}
+.muted{color:var(--mute);font-size:14px}
+.edit{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 0 0 1px var(--line);margin:14px 0}
+.edit .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:10px;margin-top:10px}
+label{display:block;font-size:14px;color:var(--mute)}
+input,select,textarea{display:block;width:100%;margin-top:4px;font:16px "IBM Plex Sans KR",sans-serif;padding:9px 10px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+textarea{min-height:100px;font-size:14px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.list .t{font-weight:500}
+.list .k{font-size:14px;color:var(--mute)}
+.list .b{display:flex;gap:6px}
+.list .b button{min-height:36px;font-size:13px;padding:0 10px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:middle}
+details{margin-top:18px}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:500}
+.toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;display:none;gap:10px;align-items:center;z-index:5;max-width:calc(100vw - 32px)}
+.toast button{min-height:34px;font-size:14px}
+@media(prefers-reduced-motion:reduce){.flip{transition:none}.bar i{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>농촌지도사 모의면접 카드</h1>
+  <p class="sub">질문을 보고 소리 내어 답한 뒤, 카드를 뒤집어 키워드를 빠뜨리지 않았는지 확인하세요.</p>
+  <div class="prog"><span id="pos">1 / 1</span><div class="bar"><i id="pbar"></i></div><span id="knownCnt"></span></div>
+  <div class="chips" id="chips"></div>
+</div></header>
+
+<main class="stage"><div class="wrap">
+  <div class="scene" id="scene" role="button" tabindex="0" aria-label="카드 뒤집기">
+    <div class="flip" id="flip">
+      <div class="face front" id="front"></div>
+      <div class="face back" id="back"></div>
+    </div>
+  </div>
+  <div class="ctrl">
+    <button type="button" id="prev">이전</button>
+    <button type="button" class="main" id="turn">뒤집기</button>
+    <button type="button" id="next">다음</button>
+  </div>
+  <div class="mark">
+    <button type="button" class="again" id="again">다시 볼래요</button>
+    <button type="button" class="ok" id="got">외웠어요</button>
+  </div>
+  <div class="opts">
+    <button type="button" id="oShuffle" aria-pressed="false">섞기</button>
+    <button type="button" id="oReview" aria-pressed="false">못 외운 카드만</button>
+    <label style="display:flex;align-items:center;gap:6px;color:var(--ink)">답변 타이머
+      <select id="oTimer"><option value="0">끄기</option><option value="30">30초</option><option value="60">1분</option><option value="90">1분 30초</option><option value="120">2분</option></select></label>
+    <button type="button" id="oRestart">타이머 다시 시작</button>
+    <span class="muted">키보드: 스페이스 뒤집기 · ← → 넘기기</span>
+  </div>
+</div></main>
+
+<section class="band"><div class="wrap">
+  <h2>질문 관리</h2>
+  <p class="muted" style="margin:0">예시 질문과 키워드가 들어 있습니다. 동생분의 실제 경험에 맞게 고치거나 질문을 추가하세요.</p>
+  <form class="edit" id="ef">
+    <strong id="eTitle">새 질문 추가</strong>
+    <label style="margin-top:10px">질문<input type="text" id="eq" required placeholder="예: 농촌지도사로서 가장 먼저 하고 싶은 일은?"></label>
+    <div class="row">
+      <label>분류<input type="text" id="ecat" list="catlist" placeholder="예: 직무"></label>
+      <label>키워드 1<input type="text" id="ek1"></label>
+      <label>키워드 2<input type="text" id="ek2"></label>
+      <label>키워드 3<input type="text" id="ek3"></label>
+    </div>
+    <datalist id="catlist"></datalist>
+    <div class="btns"><button type="submit" class="main" id="esave">추가</button><button type="button" id="ecancel" hidden>취소</button></div>
+  </form>
+  <ul class="list" id="list"></ul>
+  <details>
+    <summary>백업 · 다른 기기로 옮기기</summary>
+    <div class="btns">
+      <button type="button" id="bcopy">백업 코드 복사</button>
+      <button type="button" id="brestore">아래 코드로 복원</button>
+      <button type="button" id="breset">외운 표시 모두 지우기</button>
+    </div>
+    <textarea id="io" style="margin-top:10px" aria-label="백업 코드" placeholder="복사가 막히면 여기에 코드가 나타납니다. 복원하려면 백업 코드를 붙여넣으세요."></textarea>
+  </details>
+  <p class="muted" style="margin-top:16px">질문과 외운 표시는 이 브라우저에만 저장됩니다.</p>
+</div></section>
+<div class="toast" id="toast"><span id="tmsg"></span><button type="button" id="tundo">되돌리기</button></div>
+
+<script>
+{
+const KEY='nh-interview-cards-v1';
+const DEF=[
+ ['자기소개','1분 자기소개를 해 보세요.',['원예 전공·재배 실습','성실·세심·책임감','현장에서 믿을 수 있는 지도사']],
+ ['지원동기','농촌지도사에 지원한 이유는 무엇인가요?',['전공을 현장에서 살리고 싶음','농업인 소득·문제 해결에 도움','배우고 함께 성장하는 일']],
+ ['지원동기','왜 남해군에 지원했나요?',['경남 함양 출신, 농촌 생활 이해','남해 대표 작목(마늘·시금치 등) 관심','오래 머물며 지역과 함께']],
+ ['직무','농촌지도사는 어떤 일을 한다고 알고 있나요?',['새 기술 연구·보급','농업인 교육','현장 방문·컨설팅']],
+ ['직무','원예 전공을 업무에 어떻게 활용하겠습니까?',['시설원예·작물 생리 지식','병해충·양분 관리','실습에서 익힌 기록 습관']],
+ ['경험','실습이나 과제에서 문제를 해결한 경험은?',['수경·토경 실습 발아율 저조','물 교체·양액 기준을 기록표로','환경을 일정하게 → 발아 개선']],
+ ['경험','다른 사람과 의견이 충돌했던 경험과 해결 방법은?',['상대가 걱정하는 이유 먼저 듣기','말보다 기록·자료로 비교','상대 의견도 반영해 기준 만들기']],
+ ['인성','본인의 장점과 단점은 무엇인가요?',['장점: 꼼꼼한 기록·끝까지 책임','단점: 결정에 시간이 걸림','기한을 정해 보완 중']],
+ ['인성','리더 역할을 해 본 경험이 있나요?',['앞장서는 유형은 아님을 솔직히','맡은 역할을 끝까지 책임','기록·정리로 팀을 뒷받침']],
+ ['인성','스트레스는 어떻게 해소하나요?',['구체적인 취미 하나','규칙적인 습관','업무에 영향 주지 않기']],
+ ['상황','고령 농업인이 새 기술 도입을 거부하면?',['그동안의 경험을 먼저 존중','시범포에서 결과로 보여주기','꾸준히 찾아가 신뢰 쌓기']],
+ ['상황','상사와 의견이 다르면 어떻게 하겠습니까?',['근거를 준비해 정중히 건의','결정되면 따르기','결과를 함께 점검']],
+ ['상황','민원인이 화를 내며 찾아오면?',['끝까지 듣고 공감','사실관계 확인','해결 방법·처리 일정 안내']],
+ ['상황','부당하다고 느끼는 지시를 받으면?',['관련 규정·법령 확인','이유를 들어 정중히 의견 말하기','필요하면 정해진 절차로']],
+ ['공직가치','공무원에게 가장 중요한 가치는?',['책임감','청렴','농업인을 위한 봉사']],
+ ['공직가치','농업인이 감사의 뜻으로 선물을 주면?',['정중히 거절','마음만 감사히 받기','규정 지키는 게 서로를 위한 일']],
+ ['농업 이슈','최근 관심 있는 농업 이슈는?',['기후변화와 재배 환경','스마트농업 확산','고령화·일손 부족']],
+ ['농업 이슈','스마트팜을 지역에 어떻게 보급하겠습니까?',['작은 규모부터 맞춤형','교육·실습으로 부담 줄이기','데이터 활용까지 지원']],
+ ['농업 이슈','청년 농업인이 남해에 오게 하려면?',['정착·주거 지원 안내','선배 농가 멘토링','판로·브랜드 연결']],
+ ['포부','입직 후 포부를 말해 보세요.',['현장에서 먼저 신뢰 얻기','전문성 키우기(자격·연구)','남해 대표 작목에 도움']],
+ ['마무리','마지막으로 하고 싶은 말은?',['기회에 대한 감사','강점 한 번 더(성실·책임감)','짧고 진심 있는 각오']]
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fresh=()=>({cards:DEF.map((d,i)=>({id:'c'+i,cat:d[0],q:d[1],k:d[2]})),known:{}});
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.cards))S=fresh();
+if(!S.known)S.known={};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+if(S.dur==null)S.dur=60;
+const mmss=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+let elapsed=0;
+let cat='전체',review=false,shuffled=false,order=[],idx=0,flipped=false,editId=null,lastDel=null,tStart=0,raf=0;
+const cats=()=>['전체',...new Set(S.cards.map(c=>c.cat||'기타'))];
+function build(keepId){
+  let ids=S.cards.filter(c=>(cat==='전체'||(c.cat||'기타')===cat)&&(!review||!S.known[c.id])).map(c=>c.id);
+  if(shuffled){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}}
+  order=ids;
+  const k=keepId?order.indexOf(keepId):-1;
+  idx=k>=0?k:Math.min(idx,Math.max(0,order.length-1));
+}
+const cur=()=>S.cards.find(c=>c.id===order[idx]);
+
+function chips(){
+  const cs=cats();if(!cs.includes(cat))cat='전체';
+  $('chips').innerHTML=cs.map(c=>`<button type="button" data-c="${esc(c)}" aria-pressed="${c===cat}">${esc(c)}</button>`).join('');
+  $('catlist').innerHTML=cs.slice(1).map(c=>`<option value="${esc(c)}">`).join('');
+}
+function show(){
+  const c=cur();
+  setFlip(false,true);
+  const total=S.cards.length,kn=S.cards.filter(x=>S.known[x.id]).length;
+  $('knownCnt').textContent=`외움 ${kn}/${total}`;
+  if(!c){
+    $('pos').textContent='0 / 0';$('pbar').style.width='0';
+    const msg=review?'못 외운 카드가 없습니다. 모두 외웠어요!':'이 분류에 카드가 없습니다.';
+    $('front').innerHTML=`<div class="empty"><div class="q" style="flex:none">${msg}</div>${review?'<button type="button" class="main" id="allBtn">전체 카드로 돌아가기</button>':''}</div>`;
+    $('back').innerHTML='';stopTimer();
+    const ab=$('allBtn');if(ab)ab.addEventListener('click',e=>{e.stopPropagation();review=false;$('oReview').setAttribute('aria-pressed','false');build();show()});
+    return;
+  }
+  $('pos').textContent=`${idx+1} / ${order.length}`;
+  $('pbar').style.width=((idx+1)/order.length*100)+'%';
+  const st=S.known[c.id]?'<span class="known">외웠어요</span>':'';
+  $('front').innerHTML=`<div class="meta"><span class="cat">${esc(c.cat||'기타')}</span>${st}</div><div class="q">${esc(c.q)}</div>${S.dur?`<div class="ring" id="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="44"/><circle class="arc" id="arc" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="0"/></svg><div class="num"><span id="clk">${mmss(S.dur)}</span><small id="clkl">남은 시간</small></div></div>`:''}<div class="hint">탭해서 키워드 보기</div>`;
+  const ks=(c.k||[]).filter(Boolean);
+  $('back').innerHTML=`<div class="meta"><span class="cat">${esc(c.cat||'기타')}</span>${st}</div><div class="qs">${esc(c.q)}</div><ul class="kw">${ks.length?ks.map(k=>`<li>${esc(k)}</li>`).join(''):'<li>키워드를 추가해 주세요</li>'}</ul>${S.dur?'<div class="spent" id="spent"></div>':''}`;
+  startTimer();
+}
+function setFlip(v,silent){
+  flipped=v;$('flip').classList.toggle('on',v);
+  $('turn').textContent=v?'질문 보기':'뒤집기';
+  if(v&&S.dur&&tStart){
+    stopTimer();
+    const sp=$('spent');
+    if(sp){const over=elapsed-S.dur;sp.innerHTML=`답변 시간 <b>${mmss(elapsed)}</b> · ${over>0?`<span style="color:var(--again)">${mmss(over)} 초과</span>`:`제한 ${mmss(S.dur)} 안에 마침`}`}
+  }
+  if(!v&&!silent&&S.dur)startTimer();
+}
+function startTimer(){
+  stopTimer();elapsed=0;tStart=0;if(!S.dur)return;
+  tStart=performance.now();
+  const tick=t=>{
+    const rg=$('ring'),arc=$('arc'),ck=$('clk'),lb=$('clkl');if(!rg||!arc)return;
+    elapsed=(t-tStart)/1000;
+    const p=Math.min(1,elapsed/S.dur),left=S.dur-elapsed;
+    arc.setAttribute('stroke-dashoffset',left>0?(276.5*p).toFixed(1):'0');
+    rg.classList.toggle('mid',left>0&&left<=S.dur*0.5&&left>10);
+    rg.classList.toggle('late',left>0&&left<=10);
+    rg.classList.toggle('over',left<=0);
+    const txt=left>0?mmss(Math.ceil(left)):'+'+mmss(-left),lab=left>0?'남은 시간':'시간 초과';
+    if(ck.textContent!==txt)ck.textContent=txt;
+    if(lb.textContent!==lab)lb.textContent=lab;
+    raf=requestAnimationFrame(tick);
+  };
+  raf=requestAnimationFrame(tick);
+}
+function stopTimer(){cancelAnimationFrame(raf)}
+const go=d=>{if(!order.length)return;idx=(idx+d+order.length)%order.length;show()};
+function mark(v){
+  const c=cur();if(!c)return;
+  if(v)S.known[c.id]=true;else delete S.known[c.id];
+  save();
+  if(review&&v){build();show()}else go(1);
+  list();
+}
+
+$('scene').addEventListener('click',()=>{if(cur())setFlip(!flipped)});
+$('scene').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(cur())setFlip(!flipped)}});
+$('turn').addEventListener('click',()=>{if(cur())setFlip(!flipped)});
+$('prev').addEventListener('click',()=>go(-1));
+$('next').addEventListener('click',()=>go(1));
+$('got').addEventListener('click',()=>mark(true));
+$('again').addEventListener('click',()=>mark(false));
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(e.key===' '){e.preventDefault();if(cur())setFlip(!flipped)}
+  else if(e.key==='ArrowRight')go(1);else if(e.key==='ArrowLeft')go(-1);
+});
+let sx=null;
+$('scene').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+$('scene').addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>60){go(dx<0?1:-1)}});
+$('chips').addEventListener('click',e=>{const c=e.target.dataset.c;if(c==null)return;cat=c;idx=0;chips();build();show()});
+const tog=(id,fn)=>$(id).addEventListener('click',()=>{const v=$(id).getAttribute('aria-pressed')!=='true';$(id).setAttribute('aria-pressed',v);fn(v)});
+tog('oShuffle',v=>{shuffled=v;idx=0;build();show()});
+tog('oReview',v=>{review=v;idx=0;build();show()});
+$('oTimer').value=String(S.dur);
+$('oTimer').addEventListener('change',()=>{S.dur=+$('oTimer').value;save();show()});
+$('oRestart').addEventListener('click',()=>{if(!cur())return;if(!S.dur){S.dur=60;$('oTimer').value='60';save()}show()});
+
+function list(){
+  $('list').innerHTML=S.cards.map(c=>`<li><div><div class="t">${S.known[c.id]?'<span class="dot" title="외움"></span>':''}${esc(c.q)}</div><div class="k">${esc(c.cat||'기타')} · ${(c.k||[]).filter(Boolean).map(esc).join(' / ')}</div></div><div class="b"><button type="button" data-e="${c.id}">수정</button><button type="button" data-x="${c.id}">삭제</button></div></li>`).join('');
+}
+function resetEdit(){editId=null;$('ef').reset();$('eTitle').textContent='새 질문 추가';$('esave').textContent='추가';$('ecancel').hidden=true}
+$('ecancel').addEventListener('click',resetEdit);
+$('ef').addEventListener('submit',e=>{
+  e.preventDefault();
+  const c={id:editId||'c'+Date.now(),cat:$('ecat').value.trim()||'기타',q:$('eq').value.trim(),k:[$('ek1').value.trim(),$('ek2').value.trim(),$('ek3').value.trim()]};
+  if(!c.q)return;
+  const i=S.cards.findIndex(x=>x.id===c.id);
+  if(i>=0)S.cards[i]=c;else S.cards.push(c);
+  save();chips();build(c.id);show();list();toast(i>=0?'수정했습니다':'질문을 추가했습니다',false);resetEdit();
+});
+$('list').addEventListener('click',e=>{
+  const ed=e.target.dataset.e,dx=e.target.dataset.x;
+  if(ed){const c=S.cards.find(x=>x.id===ed);if(!c)return;editId=c.id;$('eq').value=c.q;$('ecat').value=c.cat||'';[1,2,3].forEach(n=>$('ek'+n).value=(c.k||[])[n-1]||'');$('eTitle').textContent='질문 수정';$('esave').textContent='수정 저장';$('ecancel').hidden=false;$('ef').scrollIntoView({behavior:'smooth',block:'center'})}
+  if(dx){const i=S.cards.findIndex(x=>x.id===dx);if(i<0)return;lastDel={c:S.cards.splice(i,1)[0],i};save();chips();build();show();list();toast('질문 1개를 삭제했습니다',true)}
+});
+
+let tt;
+function toast(m,undo){$('tmsg').textContent=m;$('tundo').style.display=undo?'':'none';$('toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('toast').style.display='none',undo?6000:2500)}
+$('tundo').addEventListener('click',()=>{if(lastDel){S.cards.splice(lastDel.i,0,lastDel.c);lastDel=null;save();chips();build();show();list()}$('toast').style.display='none'});
+$('bcopy').addEventListener('click',()=>{
+  const t=JSON.stringify(S);$('io').value=t;
+  const p=navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject();
+  p.then(()=>toast('백업 코드를 복사했습니다',false)).catch(()=>{$('io').select();toast('아래 칸의 코드를 직접 복사하세요',false)});
+});
+$('brestore').addEventListener('click',()=>{
+  try{const d=JSON.parse($('io').value);if(!Array.isArray(d.cards))throw 0;S={cards:d.cards,known:d.known||{},dur:d.dur??60};$("oTimer").value=String(S.dur);save();idx=0;chips();build();show();list();toast('복원했습니다',false)}catch(e){toast('백업 코드 형식이 올바르지 않습니다',false)}
+});
+$('breset').addEventListener('click',()=>{S.known={};save();build();show();list();toast('외운 표시를 모두 지웠습니다',false)});
+
+chips();build();show();list();
+}
+</script>
+</body>
+</html>
